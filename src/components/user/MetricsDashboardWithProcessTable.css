@@ -1,0 +1,128 @@
+.combined-card {
+  background-color: white;
+  border: 2px solid #FFD7A0;
+  border-radius: 12px;
+  padding: 40px;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.server-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.user-role {
+  font-size: 16px;
+  font-weight: 600;
+  color: #666;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 80px;
+  margin-bottom: 40px;
+}
+
+.metric-item {
+  text-align: center;
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.metric-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-left: 20px;
+}
+
+.metric-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.indicator-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background-color: #d0d0d0;
+}
+
+.indicator-dot.active {
+  background-color: #FF8C00;
+}
+
+.system-info {
+  padding-top: 20px;
+}
+
+.info-row {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #666;
+}
+
+.info-value {
+  color: #333;
+}
+
+.status-normal {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.card-divider {
+  margin: 30px 0;
+  border-top: 2px solid #f0f0f0;
+}
+
+.table-section {
+  padding-top: 10px;
+}
+
+@media (max-width: 1200px) {
+  .metrics-grid {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .combined-card {
+    padding: 20px;
+  }
+}

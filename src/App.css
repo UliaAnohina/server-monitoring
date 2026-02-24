@@ -1,0 +1,27 @@
+/* Удалите или замените содержимое App.css на: */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.app {
+  min-height: 100vh;
+  background-color: white; /* Полностью белый фон */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.monitoring-page {
+  max-width: 1200px; /* Уменьшил максимальную ширину */
+  margin: 0 auto; /* Центрирование */
+  padding: 20px;
+}
+
+/* Удалите или закомментируйте все, что связано с #root, если не используете */
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
