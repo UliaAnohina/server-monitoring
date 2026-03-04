@@ -1,9 +1,30 @@
 .audit-log {
-  margin: 30px 0;
+  margin: 0;
   padding: 30px;
   background-color: white;
   border: 2px solid #FFD7A0;
   border-radius: 12px;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.table-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.table-wrapper {
+  max-height: 300px; /* Ограничение высоты для скролла */
+  overflow-y: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
 }
 
 .audit-table {
@@ -23,8 +44,35 @@
   background-color: #fafafa;
   font-weight: 600;
   color: #666;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.audit-table tbody tr {
+  transition: background-color 0.2s;
 }
 
 .audit-table tbody tr:hover {
   background-color: #fafafa;
+}
+
+/* Кастомный скроллбар */
+.table-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #FFD7A0;
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #FF8C00;
 }

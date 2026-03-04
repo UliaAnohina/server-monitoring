@@ -1,31 +1,32 @@
 .process-table-admin {
-  margin: 30px 0;
-  padding: 30px;
-  background-color: white;
-  border: 2px solid #FFD7A0;
-  border-radius: 12px;
+  /* Убираем все внешние отступы */
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
 }
 
 .table-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 15px;
+  margin-bottom: 15px;
+  padding: 0;
 }
 
 .table-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #333;
   margin: 0;
 }
 
 .table-hint {
-  font-size: 14px;
-  color: #666;
+  font-size: 13px;
+  color: #999;
   margin: 0;
+  font-style: italic;
 }
 
 .table-wrapper {
@@ -40,7 +41,7 @@
 
 .process-table th,
 .process-table td {
-  padding: 12px 15px;
+  padding: 10px 12px;
   text-align: left;
   border-bottom: 1px solid #f0f0f0;
 }
@@ -52,6 +53,7 @@
   cursor: pointer;
   user-select: none;
   transition: background-color 0.2s;
+  font-size: 13px;
 }
 
 .process-table th:hover {
@@ -80,4 +82,32 @@
 
 .process-table td {
   color: #333;
+  font-size: 14px;
+}
+
+.filter-container {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.filter-input {
+  padding: 8px 12px;
+  border: 2px solid #FFD7A0;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 300px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.filter-input:focus {
+  border-color: #FF8C00;
+}
+
+.process-table td.no-data {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-style: italic;
 }

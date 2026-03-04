@@ -11,6 +11,7 @@ function ProcessTableAdmin() {
   const [selectedProcess, setSelectedProcess] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [filter, setFilter] = useState(''); // ← ДОБАВЛЕНО: состояние фильтра
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -23,13 +24,11 @@ function ProcessTableAdmin() {
     return () => clearInterval(interval);
   }, []);
 
-  // Обработка клика по процессу (ЛКМ)
   const handleProcessClick = (process) => {
     setSelectedProcess(process);
     setIsModalOpen(true);
   };
 
-  // Сортировка
   const handleSort = (key) => {
     let direction = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -38,7 +37,13 @@ function ProcessTableAdmin() {
     setSortConfig({ key, direction });
   };
 
-  const sortedProcesses = [...processes].sort((a, b) => {
+  // ← ДОБАВЛЕНО: фильтрация процессов
+  const filteredProcesses = processes.filter(p => 
+    p.name.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  // Сортировка отфильтрованных процессов
+  const sortedProcesses = [...filteredProcesses].sort((a, b) => {
     if (sortConfig.key) {
       if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'asc' ? -1 : 1;
       if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'asc' ? 1 : -1;
@@ -46,7 +51,6 @@ function ProcessTableAdmin() {
     return 0;
   });
 
-  // Обновление списка после действий
   const handleProcessUpdated = (pid, action, newPriority = null) => {
     if (action === 'terminate' || action === 'terminateTree') {
       setProcesses(processes.filter(p => p.pid !== pid));
@@ -63,7 +67,17 @@ function ProcessTableAdmin() {
     <div className="process-table-admin">
       <div className="table-header">
         <h3 className="table-title">Таблица процессов</h3>
-        <p className="table-hint">Кликните по имени процесса для управления</p>
+      </div>
+      
+      {/* ← ДОБАВЛЕНО: поле фильтра */}
+      <div className="filter-container">
+        <input
+          type="text"
+          placeholder="Фильтр по имени процесса..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="filter-input"
+        />
       </div>
       
       <div className="table-wrapper">
@@ -79,30 +93,38 @@ function ProcessTableAdmin() {
             </tr>
           </thead>
           <tbody>
-            {sortedProcesses.map(process => (
-              <tr key={process.pid} className="process-row">
-                <td>{process.pid}</td>
-                <td 
-                  className="process-name clickable"
-                  onClick={() => handleProcessClick(process)}
-                  title="Кликните для управления процессом"
-                >
-                  {process.name}
+            {sortedProcesses.length > 0 ? (
+              sortedProcesses.map(process => (
+                <tr key={process.pid} className="process-row">
+                  <td>{process.pid}</td>
+                  <td 
+                    className="process-name clickable"
+                    onClick={() => handleProcessClick(process)}
+                    title="Кликните для управления процессом"
+                  >
+                    {process.name}
+                  </td>
+                  <td>{process.cpu}</td>
+                  <td>{process.mem}</td>
+                  <td>{process.status}</td>
+                  <td>{process.owner}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="no-data">
+                  Процессы не найдены
                 </td>
-                <td>{process.cpu}</td>
-                <td>{process.mem}</td>
-                <td>{process.status}</td>
-                <td>{process.owner}</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Модальное окно управления процессом */}
       {isModalOpen && selectedProcess && (
         <ProcessManagementModal
           process={selectedProcess}
+          processes={processes}
           onClose={() => {
             setIsModalOpen(false);
             setSelectedProcess(null);

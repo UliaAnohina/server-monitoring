@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ProcessTable from './ProcessTable';
+import ProcessTableAdmin from '../admin/ProcessTableAdmin';
 import './MetricsDashboardWithProcessTable.css';
 
 function MetricsDashboardWithProcessTable({ isAdmin = false }) {
@@ -42,6 +43,7 @@ function MetricsDashboardWithProcessTable({ isAdmin = false }) {
 
   return (
     <div className="combined-card">
+      {/* Верхняя часть: метрики */}
       <div className="metrics-section">
         <div className="card-header">
           <span className="server-name">Server 1.0</span>
@@ -95,9 +97,9 @@ function MetricsDashboardWithProcessTable({ isAdmin = false }) {
       {/* Разделительная линия */}
       <div className="card-divider"></div>
 
-      {/* Нижняя часть с таблицей */}
+      {/* Нижняя часть: таблица процессов */}
       <div className="table-section">
-        <ProcessTable />
+        {isAdmin ? <ProcessTableAdmin /> : <ProcessTable />}
       </div>
     </div>
   );
