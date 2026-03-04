@@ -1,0 +1,110 @@
+.collapsible-section {
+  margin: 20px 0;
+  background-color: white;
+  border: 2px solid #FFD7A0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.collapsible-section.expanded {
+  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.15);
+}
+
+.section-header {
+  padding: 20px 30px;
+  background-color: #fafafa;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  border-bottom: 2px solid #FFD7A0;
+}
+
+.section-header:hover {
+  background-color: #f0f0f0;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.section-icon {
+  font-size: 20px;
+}
+
+.toggle-indicator {
+  margin-left: auto;
+  color: #FF8C00;
+  font-size: 14px;
+  transition: transform 0.3s;
+}
+
+.section-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.collapsible-section.expanded .section-content {
+  max-height: 500px;
+  overflow: visible;
+}
+
+/* Стили для таблиц внутри секций */
+.section-content .table-scroll-wrapper {
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  margin-top: 15px;
+}
+
+.section-content table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.section-content th,
+.section-content td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.section-content th {
+  background-color: #fafafa;
+  font-weight: 600;
+  color: #666;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.section-content tbody tr:hover {
+  background-color: #fafafa;
+}
+
+/* Кастомный скроллбар */
+.section-content .table-scroll-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.section-content .table-scroll-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.section-content .table-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: #FFD7A0;
+  border-radius: 4px;
+}
+
+.section-content .table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #FF8C00;
+}

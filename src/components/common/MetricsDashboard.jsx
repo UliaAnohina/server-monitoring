@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './MetricsDashboard.css';
 
-function MetricsDashboard({ userRole = 'Гость' }) {
+function MetricsDashboard({ userRole = 'Гость', showContainer = true }) {
   const [metrics, setMetrics] = useState({
     cpu: 58,
     ram: 76,
@@ -40,7 +40,7 @@ function MetricsDashboard({ userRole = 'Гость' }) {
   };
 
   return (
-    <div className="metrics-container">
+    <div className={showContainer ? 'metrics-container' : 'metrics-inner'}>
       <div className="metrics-header">
         <span className="server-name">Server 1.0</span>
         <span className="user-role">{userRole}</span>

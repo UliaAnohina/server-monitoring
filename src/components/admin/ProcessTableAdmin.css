@@ -111,3 +111,80 @@
   color: #999;
   font-style: italic;
 }
+
+.process-table-admin {
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+}
+
+.filter-container {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.filter-input {
+  padding: 8px 12px;
+  border: 2px solid #FFD7A0;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 300px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.filter-input:focus {
+  border-color: #FF8C00;
+}
+
+.process-table-admin {
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+}
+
+.filter-container {
+  margin-bottom: 20px; /* Увеличенный отступ */
+  margin-top: 10px;    /* Отступ сверху */
+  display: flex;
+  justify-content: flex-end;
+}
+
+.filter-input {
+  padding: 8px 12px;
+  border: 2px solid #FFD7A0;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 300px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.filter-input:focus {
+  border-color: #FF8C00;
+}
+
+.table-scroll-wrapper {
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+}
+
+.process-table th {
+  background-color: #fafafa;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+  
+  /* Закрепление заголовка */
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+}

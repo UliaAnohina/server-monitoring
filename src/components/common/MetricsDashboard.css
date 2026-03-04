@@ -1,3 +1,6 @@
+/* ================================ */
+/* Основной контейнер (с рамкой) */
+/* ================================ */
 .metrics-container {
   background-color: white;
   border: 2px solid #FFD7A0;
@@ -7,7 +10,22 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.metrics-header {
+/* ================================ */
+/* Внутренний контейнер (без рамки) */
+/* Для использования внутри unified карточки */
+/* ================================ */
+.metrics-inner {
+  /* Убираем внешние отступы и рамку */
+  padding: 0;
+  margin: 0;
+  border: none;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+/* Сохраняем внутренние стили для обоих вариантов */
+.metrics-container .metrics-header,
+.metrics-inner .metrics-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -16,30 +34,35 @@
   border-bottom: 2px solid #f0f0f0;
 }
 
-.server-name {
+.metrics-container .server-name,
+.metrics-inner .server-name {
   font-size: 16px;
   font-weight: 600;
   color: #333;
 }
 
-.user-role {
+.metrics-container .user-role,
+.metrics-inner .user-role {
   font-size: 16px;
   font-weight: 600;
   color: #666;
 }
 
-.metrics-grid {
+.metrics-container .metrics-grid,
+.metrics-inner .metrics-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 80px;
   margin-bottom: 50px;
 }
 
-.metric-item {
+.metrics-container .metric-item,
+.metrics-inner .metric-item {
   text-align: center;
 }
 
-.metric-label {
+.metrics-container .metric-label,
+.metrics-inner .metric-label {
   display: block;
   font-size: 14px;
   font-weight: 600;
@@ -48,7 +71,8 @@
   text-transform: uppercase;
 }
 
-.metric-value {
+.metrics-container .metric-value,
+.metrics-inner .metric-value {
   display: block;
   font-size: 36px;
   font-weight: 700;
@@ -56,60 +80,77 @@
   margin-bottom: 15px;
 }
 
-.metric-indicators {
+.metrics-container .metric-indicators,
+.metrics-inner .metric-indicators {
   display: flex;
   justify-content: center;
   gap: 8px;
 }
 
-.indicator-dot {
+.metrics-container .indicator-dot,
+.metrics-inner .indicator-dot {
   width: 12px;
   height: 12px;
   border-radius: 3px;
   background-color: #d0d0d0;
 }
 
-.indicator-dot.active {
+.metrics-container .indicator-dot.active,
+.metrics-inner .indicator-dot.active {
   background-color: #FF8C00;
 }
 
-.system-info {
+.metrics-container .system-info,
+.metrics-inner .system-info {
   padding-top: 30px;
   border-top: 2px solid #f0f0f0;
 }
 
-.info-row {
+.metrics-container .info-row,
+.metrics-inner .info-row {
   margin-bottom: 12px;
   font-size: 15px;
 }
 
-.info-label {
+.metrics-container .info-label,
+.metrics-inner .info-label {
   font-weight: 600;
   color: #666;
 }
 
-.info-value {
+.metrics-container .info-value,
+.metrics-inner .info-value {
   color: #333;
 }
 
-.status-normal {
+.metrics-container .status-normal,
+.metrics-inner .status-normal {
   color: #28a745;
   font-weight: 600;
 }
 
+/* ================================ */
+/* Адаптивность */
+/* ================================ */
 @media (max-width: 1200px) {
-  .metrics-grid {
+  .metrics-container .metrics-grid,
+  .metrics-inner .metrics-grid {
     gap: 40px;
   }
 }
 
 @media (max-width: 768px) {
-  .metrics-grid {
+  .metrics-container .metrics-grid,
+  .metrics-inner .metrics-grid {
     grid-template-columns: 1fr;
     gap: 30px;
   }
   
   .metrics-container {
     padding: 20px;
+  }
+  
+  .metrics-inner {
+    padding: 0;
   }
 }

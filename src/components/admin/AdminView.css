@@ -1,0 +1,89 @@
+.admin-view {
+  padding: 20px;
+}
+
+/* Единая карточка для всех секций */
+.admin-unified-card {
+  background-color: white;
+  border: 2px solid #FFD7A0;
+  border-radius: 12px;
+  padding: 30px 30px 20px 30px; /* Уменьшили нижний отступ */
+  box-shadow: 0 2px 8px rgba(255, 140, 0, 0.1);
+}
+
+/* Секция метрик */
+.metrics-section {
+  margin-bottom: 0;
+}
+
+/* Убираем лишние отступы у MetricsDashboard внутри карточки */
+.metrics-section .metrics-container,
+.metrics-section .metrics-inner {
+  padding: 0;
+  margin: 0;
+  border: none;
+  box-shadow: none;
+}
+
+/* Разделительная линия (еле заметная) */
+.section-divider {
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 20px 0; /* Уменьшили отступы */
+  border: none;
+}
+
+/* Сворачиваемая секция */
+.collapsible-section {
+  margin: 0;
+}
+
+/* Заголовок секции */
+.section-header {
+  padding: 12px 0; /* Уменьшили отступы */
+  cursor: pointer;
+  transition: background-color 0.3s;
+  border-radius: 6px;
+}
+
+.section-header:hover {
+  background-color: #fafafa;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.toggle-indicator {
+  margin-left: auto;
+  color: #FF8C00;
+  font-size: 12px;
+  transition: transform 0.3s;
+}
+
+/* Контент секции */
+.section-content {
+  padding: 10px 0 15px 0; /* Уменьшили верхний отступ */
+}
+
+/* Убираем границы и тени у вложенных компонентов */
+.section-content .process-table-admin,
+.section-content .user-management,
+.section-content .audit-log {
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* Ограничиваем высоту свернутых таблиц */
+.section-content .table-scroll-wrapper {
+  max-height: 200px; /* Уменьшили с 250px до 200px */
+}

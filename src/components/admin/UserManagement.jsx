@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import './UserManagement.css';
 
-function UserManagement({ isVisible, onClose }) {
+function UserManagement() {
   const [users, setUsers] = useState([
     { id: 1, login: 'admin', role: 'Администратор', lastLogin: '2026-02-24 10:30' },
     { id: 2, login: 'user1', role: 'Ограниченный', lastLogin: '2026-02-24 09:15' },
@@ -10,6 +10,9 @@ function UserManagement({ isVisible, onClose }) {
     { id: 5, login: 'user3', role: 'Гость', lastLogin: '2026-02-24 08:30' },
     { id: 6, login: 'user4', role: 'Ограниченный', lastLogin: '2026-02-23 14:15' },
     { id: 7, login: 'user5', role: 'Гость', lastLogin: '2026-02-24 10:00' },
+    { id: 8, login: 'developer1', role: 'Ограниченный', lastLogin: '2026-02-24 12:00' },
+    { id: 9, login: 'tester1', role: 'Ограниченный', lastLogin: '2026-02-24 11:45' },
+    { id: 10, login: 'guest2', role: 'Гость', lastLogin: '2026-02-23 18:30' },
   ]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -154,26 +157,16 @@ function UserManagement({ isVisible, onClose }) {
     setSelectedUser(null);
   };
 
-  // Если таблица не видима - не рендерим ничего
-  if (!isVisible) {
-    return null;
-  }
 
   return (
-    <div className="user-management" ref={tableRef}>
-      <div className="table-header">
-        <h3 className="table-title">Список пользователей</h3>
-        <div className="table-controls">
-          <button className="btn btn-close" onClick={onClose}>
-            ✕ Скрыть таблицу
-          </button>
-          <button className="btn btn-primary" onClick={handleAddUser}>
-            + Добавить пользователя
-          </button>
-        </div>
+    <div className="user-management">
+      
+      <div className="table-header-actions">
+        <button className="btn btn-primary" onClick={handleAddUser}>
+          Добавить пользователя
+        </button>
       </div>
 
-      {/* Обертка для скролла */}
       <div className="table-scroll-wrapper">
         <table className="user-table">
           <thead>
@@ -223,14 +216,14 @@ function UserManagement({ isVisible, onClose }) {
               className="dropdown-btn edit"
               onClick={() => handleEditUser(selectedUser)}
             >
-              ✏️ Редактировать
+              Редактировать
             </button>
             {selectedUser.role !== 'Администратор' && (
               <button 
                 className="dropdown-btn delete"
                 onClick={() => handleDeleteUser(selectedUser.id)}
               >
-                🗑️ Удалить
+                Удалить
             </button>
             )}
           </div>
