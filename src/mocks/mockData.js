@@ -1,11 +1,49 @@
-// Моковые данные для тестирования
-
 export const mockUsers = [
-  { id: 1, username: 'admin', login: 'admin', password: 'admin', is_admin: true, role: 'admin', last_login: '2026-02-24 10:30:00' },
-  { id: 2, username: 'user1', login: 'user1', password: 'user1', is_admin: false, role: 'user', last_login: '2026-02-24 09:15:00' },
-  { id: 3, username: 'guest1', login: 'guest1', password: 'guest1', is_admin: false, role: 'guest', last_login: '2026-02-23 16:45:00' },
-  { id: 4, username: 'user2', login: 'user2', password: 'user2', is_admin: false, role: 'user', last_login: '2026-02-24 11:20:00' },
-  { id: 5, username: 'developer', login: 'developer', password: 'dev123', is_admin: false, role: 'user', last_login: '2026-02-24 08:00:00' },
+  { 
+    id: 1, 
+    username: 'admin', 
+    login: 'admin', 
+    password: 'admin', 
+    is_admin: true, 
+    role: 'admin', 
+    last_login: '2026-02-24 10:30:00' 
+  },
+  { 
+    id: 2, 
+    username: 'user1', 
+    login: 'user1', 
+    password: 'user1', 
+    is_admin: false, 
+    role: 'user', 
+    last_login: '2026-02-24 09:15:00' 
+  },
+  { 
+    id: 3, 
+    username: 'guest1', 
+    login: 'guest1', 
+    password: 'guest1', 
+    is_admin: false, 
+    role: 'guest', 
+    last_login: '2026-02-23 16:45:00' 
+  },
+  { 
+    id: 4, 
+    username: 'user2', 
+    login: 'user2', 
+    password: 'user2', 
+    is_admin: false, 
+    role: 'user', 
+    last_login: '2026-02-24 11:20:00' 
+  },
+  { 
+    id: 5, 
+    username: 'developer', 
+    login: 'developer', 
+    password: 'dev123', 
+    is_admin: false, 
+    role: 'user', 
+    last_login: '2026-02-24 08:00:00' 
+  },
 ];
 
 export const mockProcesses = [

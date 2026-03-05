@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from './context/AuthContext';
 import { config } from './config';
 import Header from './components/common/Header';
 import GuestView from './components/guest/GuestView';
@@ -7,14 +8,45 @@ import AdminView from './components/admin/AdminView';
 import './App.css';
 
 function App() {
-  const [userRole, setUserRole] = useState(null);
+  const { user, login, logout } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (role) => {
-    setUserRole(role);
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    if (!username.trim() || !password.trim()) {
+      setError('Введите логин и пароль');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      let role = 'user';
+      if (username.toLowerCase() === 'admin') {
+        role = 'admin';
+      } else if (username.toLowerCase().includes('guest')) {
+        role = 'guest';
+      }
+
+      await login(username, password, role);
+      setShowLoginModal(false);
+      setUsername('');
+      setPassword('');
+    } catch (err) {
+      setError(err.message || 'Ошибка входа');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLogout = () => {
-    setUserRole(null);
+    logout();
   };
 
   const toggleMockMode = () => {
@@ -23,7 +55,7 @@ function App() {
     window.location.reload();
   };
 
-  if (!userRole) {
+  if (showLoginModal) {
     return (
       <div className="login-page">
         <div className="mode-switcher">
@@ -31,31 +63,64 @@ function App() {
             {config.USE_MOCKS ? 'Тестовый режим' : 'Real API'}
           </button>
         </div>
-        <h1 style={{ color: '#FF8C00', textAlign: 'center' }}>Авторизация</h1>
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '15px',
-          padding: '40px',
-          border: '2px solid #FFD7A0',
-          borderRadius: '12px',
-          backgroundColor: 'white',
-          maxWidth: '400px',
-          margin: '100px auto'
-        }}>
-          <p style={{ textAlign: 'center', color: '#666' }}>
-          </p>
-          <p style={{ textAlign: 'center', fontSize: '12px', color: '#999' }}>
-          </p>
-          <button onClick={() => handleLogin('guest')} style={buttonStyle}>
-            Войти как Гость
-          </button>
-          <button onClick={() => handleLogin('user')} style={buttonStyle}>
-            Войти как Ограниченный пользователь
-          </button>
-          <button onClick={() => handleLogin('admin')} style={buttonStyle}>
-            Войти как Администратор
-          </button>
+
+        <div className="login-container">
+          <h1 className="login-title">Авторизация</h1>
+          
+          <form onSubmit={handleLoginSubmit} className="login-form">
+            {error && (
+              <div className="error-message">
+                {error}
+              </div>
+            )}
+            
+            <div className="form-group">
+              <input
+                type="text"
+                placeholder="Логин"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="form-input"
+                autoComplete="username"
+                disabled={isLoading}
+                autoFocus
+              />
+            </div>
+
+            <div className="form-group">
+              <input
+                type="password"
+                placeholder="Пароль"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="form-input"
+                autoComplete="current-password"
+                disabled={isLoading}
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              className="login-button"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Вход...' : 'Войти'}
+            </button>
+
+            <button 
+              type="button"
+              className="cancel-button"
+              onClick={() => {
+                setShowLoginModal(false);
+                setUsername('');
+                setPassword('');
+                setError('');
+              }}
+            >
+              Отмена
+            </button>
+          </form>
+
         </div>
       </div>
     );
@@ -63,25 +128,22 @@ function App() {
 
   return (
     <div className="app">
-      <Header role={userRole} onLogout={handleLogout} />
+      <Header 
+        role={user?.role || 'guest'} 
+        onLogout={handleLogout}
+        onLoginClick={() => setShowLoginModal(true)}
+        isLoggedIn={!!user}
+      />
       <div className="monitoring-page">
-        {userRole === 'guest' && <GuestView />}
-        {userRole === 'user' && <UserView />}
-        {userRole === 'admin' && <AdminView />}
+        {}
+        {!user && <GuestView />}
+        
+        {}
+        {user?.role === 'user' && <UserView />}
+        {user?.role === 'admin' && <AdminView />}
       </div>
     </div>
   );
 }
-
-const buttonStyle = {
-  padding: '15px 30px',
-  fontSize: '16px',
-  backgroundColor: '#FF8C00',
-  color: 'white',
-  border: 'none',
-  borderRadius: '6px',
-  cursor: 'pointer',
-  fontWeight: '600'
-};
 
 export default App;

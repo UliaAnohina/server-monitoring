@@ -1,6 +1,3 @@
-/* ================================ */
-/* Основной контейнер (с рамкой) */
-/* ================================ */
 .metrics-container {
   background-color: white;
   border: 2px solid #FFD7A0;
@@ -10,12 +7,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* ================================ */
-/* Внутренний контейнер (без рамки) */
-/* Для использования внутри unified карточки */
-/* ================================ */
 .metrics-inner {
-  /* Убираем внешние отступы и рамку */
   padding: 0;
   margin: 0;
   border: none;
@@ -23,7 +15,6 @@
   background-color: transparent;
 }
 
-/* Сохраняем внутренние стили для обоих вариантов */
 .metrics-container .metrics-header,
 .metrics-inner .metrics-header {
   display: flex;
@@ -52,7 +43,7 @@
 .metrics-inner .metrics-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 80px;
+  gap: 80 px;
   margin-bottom: 50px;
 }
 
@@ -61,23 +52,26 @@
   text-align: center;
 }
 
+.metrics-container .metric-header,
+.metrics-inner .metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
 .metrics-container .metric-label,
 .metrics-inner .metric-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  color: #666;
-  margin-bottom: 15px;
-  text-transform: uppercase;
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
 }
 
 .metrics-container .metric-value,
 .metrics-inner .metric-value {
-  display: block;
-  font-size: 36px;
+  font-size: 24px;
   font-weight: 700;
   color: #333;
-  margin-bottom: 15px;
 }
 
 .metrics-container .metric-indicators,
@@ -89,9 +83,9 @@
 
 .metrics-container .indicator-dot,
 .metrics-inner .indicator-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
+  width: 20px;
+  height: 30px;
+  border-radius: 10px;
   background-color: #d0d0d0;
 }
 
@@ -129,9 +123,6 @@
   font-weight: 600;
 }
 
-/* ================================ */
-/* Адаптивность */
-/* ================================ */
 @media (max-width: 1200px) {
   .metrics-container .metrics-grid,
   .metrics-inner .metrics-grid {

@@ -1,17 +1,25 @@
-import { useState, useEffect } from 'react';
 import './Header.css';
 
-function Header({ role = 'guest', onLogout }) {
+function Header({ onLogout, onLoginClick, isLoggedIn }) {
+  
+
   return (
     <header className="header">
-      <h1 className="header-title">МОНИТОРИНГ РЕСУРСОВ СЕРВЕРА</h1>
-      <div className="header-right">
-        <button 
-          onClick={onLogout}
-          className="login-button"
-        >
-          {role === 'guest' ? 'Войти' : 'Выйти'}
-        </button>
+      <div className="header-content">
+        <h1 className="header-title">МОНИТОРИНГ РЕСУРСОВ СЕРВЕРА</h1>
+        <div className="header-actions">
+          {isLoggedIn ? (
+            <>
+              <button className="logout-btn" onClick={onLogout}>
+                Выйти
+              </button>
+            </>
+          ) : (
+            <button className="login-btn" onClick={onLoginClick}>
+              Войти
+            </button>
+          )}
+        </div>
       </div>
     </header>
   );

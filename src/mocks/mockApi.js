@@ -73,7 +73,7 @@ export const mockApi = {
 
   getMetrics: async () => {
     await delay();
-    checkAuth();
+    //checkAuth();
     return simulateServerMetrics();
   },
 
