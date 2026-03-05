@@ -1,25 +1,37 @@
 import { useState, useEffect } from 'react';
+import { fetchProcesses } from '../../apiService';
+import { config } from '../../config';
 import './ProcessTable.css';
 
 function ProcessTable() {
-  const [processes, setProcesses] = useState([
-    { pid: 1234, name: 'chrome.exe', cpu: 15.2, mem: 8.5, status: 'Running', owner: 'user1' },
-    { pid: 5678, name: 'python.exe', cpu: 2.1, mem: 3.2, status: 'Sleeping', owner: 'admin' },
-    { pid: 9012, name: 'code.exe', cpu: 8.7, mem: 12.1, status: 'Running', owner: 'user2' },
-  ]);
+  const [processes, setProcesses] = useState([]);
   const [filter, setFilter] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const loadProcesses = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const data = await fetchProcesses({
+        filter_name: filter || undefined,
+        sort_by: sortConfig.key || undefined
+      });
+      setProcesses(data);
+    } catch (e) {
+      setError(e.message || 'Не удалось загрузить процессы');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProcesses(prev => prev.map(p => ({
-        ...p,
-        cpu: Number.parseFloat((Math.max(0, p.cpu + (Math.random() - 0.5) * 2)).toFixed(1)),
-        mem: Number.parseFloat((Math.max(0, p.mem + (Math.random() - 0.5) * 1)).toFixed(1))
-      })));
-    }, 10000);
+    loadProcesses();
+    const interval = setInterval(loadProcesses, config.AUTO_REFRESH.PROCESSES || 10000);
     return () => clearInterval(interval);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, sortConfig.key, sortConfig.direction]);
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -56,6 +68,11 @@ function ProcessTable() {
       </div>
       
       <div className="table-wrapper">
+        {error && (
+          <div className="table-error">
+            {error}
+          </div>
+        )}
         <table className="process-table">
           <thead>
             <tr>
@@ -68,7 +85,13 @@ function ProcessTable() {
             </tr>
           </thead>
           <tbody>
-            {sortedProcesses.length > 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                  Загрузка процессов...
+                </td>
+              </tr>
+            ) : sortedProcesses.length > 0 ? (
               sortedProcesses.map(process => (
                 <tr key={process.pid}>
                   <td>{process.pid}</td>

@@ -54,7 +54,12 @@ export const mockApi = {
     }
     
     currentToken = `mock-jwt-token-${Date.now()}`;
-    
+
+    // Сохраняем токен и данные пользователя в localStorage,
+    // чтобы mock-запросы, проверяющие авторизацию, работали так же, как с реальным API
+    localStorage.setItem('access_token', currentToken);
+    localStorage.setItem('token_type', 'bearer');
+
     // Сохраняем данные пользователя
     const userData = {
       id: user.id,
@@ -69,6 +74,23 @@ export const mockApi = {
       token_type: 'bearer',
       expires_in: 3600
     };
+  },
+
+  // Список пользователей
+  getUsers: async () => {
+    await delay();
+    checkAdmin();
+
+    return mockUsers.map(user => ({
+      id: user.id,
+      login: user.login,
+      role: user.role === 'admin' 
+        ? 'Администратор' 
+        : user.role === 'user' 
+          ? 'Ограниченный' 
+          : 'Гость',
+      lastLogin: user.last_login || null
+    }));
   },
 
   getMetrics: async () => {

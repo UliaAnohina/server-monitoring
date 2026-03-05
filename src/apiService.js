@@ -47,6 +47,27 @@ export const getAccessToken = async (username, password) => {
   return data;
 };
 
+// ПОЛЬЗОВАТЕЛИ
+
+export const fetchUsers = async () => {
+  if (config.USE_MOCKS) {
+    return await mockApi.getUsers();
+  }
+
+  const response = await fetch(`${config.API_BASE_URL}/users`, {
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('Нет прав для просмотра пользователей');
+    }
+    throw new Error('Ошибка загрузки пользователей');
+  }
+
+  return await response.json();
+};
+
 export const getCurrentUser = () => {
   const userStr = localStorage.getItem('user');
   return userStr ? JSON.parse(userStr) : null;

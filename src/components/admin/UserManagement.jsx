@@ -1,19 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
+import { fetchUsers, addUser, editUser, deleteUser } from '../../apiService';
 import './UserManagement.css';
 
+function mapApiUserToView(user) {
+  const rawRole = user.role || user.role_name;
+  let roleLabel = rawRole;
+
+  if (rawRole === 'admin' || rawRole === 'Администратор') {
+    roleLabel = 'Администратор';
+  } else if (rawRole === 'user' || rawRole === 'Ограниченный' || rawRole === 'limited') {
+    roleLabel = 'Ограниченный';
+  } else if (rawRole === 'guest' || rawRole === 'Гость') {
+    roleLabel = 'Гость';
+  }
+
+  return {
+    id: user.id,
+    login: user.login || user.username,
+    role: roleLabel,
+    lastLogin: user.lastLogin || user.last_login || 'Никогда'
+  };
+}
+
 function UserManagement() {
-  const [users, setUsers] = useState([
-    { id: 1, login: 'admin', role: 'Администратор', lastLogin: '2026-02-24 10:30' },
-    { id: 2, login: 'user1', role: 'Ограниченный', lastLogin: '2026-02-24 09:15' },
-    { id: 3, login: 'guest1', role: 'Гость', lastLogin: '2026-02-23 16:45' },
-    { id: 4, login: 'user2', role: 'Ограниченный', lastLogin: '2026-02-24 11:20' },
-    { id: 5, login: 'user3', role: 'Гость', lastLogin: '2026-02-24 08:30' },
-    { id: 6, login: 'user4', role: 'Ограниченный', lastLogin: '2026-02-23 14:15' },
-    { id: 7, login: 'user5', role: 'Гость', lastLogin: '2026-02-24 10:00' },
-    { id: 8, login: 'developer1', role: 'Ограниченный', lastLogin: '2026-02-24 12:00' },
-    { id: 9, login: 'tester1', role: 'Ограниченный', lastLogin: '2026-02-24 11:45' },
-    { id: 10, login: 'guest2', role: 'Гость', lastLogin: '2026-02-23 18:30' },
-  ]);
+  const [users, setUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
@@ -27,6 +37,26 @@ function UserManagement() {
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const dropdownRef = useRef(null);
   const tableRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [globalError, setGlobalError] = useState('');
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        setLoading(true);
+        setGlobalError('');
+        const apiUsers = await fetchUsers();
+        setUsers(apiUsers.map(mapApiUserToView));
+      } catch (e) {
+        setGlobalError(e.message || 'Не удалось загрузить пользователей');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUsers();
+  }, []);
 
   // Закрытие dropdown при клике вне его и при скролле
   useEffect(() => {
@@ -117,7 +147,7 @@ function UserManagement() {
     setSelectedUser(null);
   };
 
-  const handleDeleteUser = (userId) => {
+  const handleDeleteUser = async (userId) => {
     const userToDelete = users.find(u => u.id === userId);
     
     if (userToDelete && userToDelete.role === 'Администратор') {
@@ -126,41 +156,69 @@ function UserManagement() {
       return;
     }
     
-    if (window.confirm('Вы действительно хотите удалить этого пользователя?')) {
+    if (!window.confirm('Вы действительно хотите удалить этого пользователя?')) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setGlobalError('');
+      await deleteUser(userId);
       setUsers(users.filter(u => u.id !== userId));
       setSelectedUser(null);
+    } catch (e) {
+      setGlobalError(e.message || 'Ошибка удаления пользователя');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleSaveUser = () => {
+  const handleSaveUser = async () => {
     if (!validateForm()) return;
 
-    if (editingUser) {
-      setUsers(users.map(u => 
-        u.id === editingUser.id ? {
-          ...u,
+    try {
+      setSaving(true);
+      setGlobalError('');
+
+      if (editingUser) {
+        const updated = await editUser(editingUser.id, {
           login: formData.login,
-          role: formData.role === 'admin' ? 'Администратор' : formData.role === 'user' ? 'Ограниченный' : 'Гость'
-        } : u
-      ));
-    } else {
-      const newUser = {
-        id: Math.max(...users.map(u => u.id), 0) + 1,
-        login: formData.login,
-        role: formData.role === 'admin' ? 'Администратор' : formData.role === 'user' ? 'Ограниченный' : 'Гость',
-        lastLogin: 'Никогда'
-      };
-      setUsers([...users, newUser]);
+          password: formData.password || undefined,
+          role: formData.role
+        });
+
+        setUsers(prev =>
+          prev.map(u =>
+            u.id === editingUser.id ? mapApiUserToView(updated) : u
+          )
+        );
+      } else {
+        const created = await addUser({
+          login: formData.login,
+          password: formData.password,
+          role: formData.role
+        });
+
+        setUsers(prev => [...prev, mapApiUserToView(created)]);
+      }
+
+      setIsModalOpen(false);
+      setSelectedUser(null);
+    } catch (e) {
+      setGlobalError(e.message || 'Ошибка сохранения пользователя');
+    } finally {
+      setSaving(false);
     }
-    
-    setIsModalOpen(false);
-    setSelectedUser(null);
   };
 
 
   return (
     <div className="user-management">
-      
+      {globalError && (
+        <div className="user-error-banner">
+          {globalError}
+        </div>
+      )}
       <div className="table-header-actions">
         <button className="btn btn-primary" onClick={handleAddUser}>
           Добавить пользователя
@@ -178,7 +236,19 @@ function UserManagement() {
             </tr>
           </thead>
           <tbody>
-            {users.map(user => (
+            {loading ? (
+              <tr>
+                <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
+                  Загрузка пользователей...
+                </td>
+              </tr>
+            ) : users.length === 0 ? (
+              <tr>
+                <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
+                  Пользователи не найдены
+                </td>
+              </tr>
+            ) : users.map(user => (
               <tr 
                 key={user.id}
                 className={`user-row ${selectedUser && selectedUser.id === user.id ? 'selected' : ''}`}
@@ -237,6 +307,12 @@ function UserManagement() {
               <h3>{editingUser ? 'Редактирование пользователя' : 'Добавление нового пользователя'}</h3>
               <button className="close-btn" onClick={() => {setIsModalOpen(false); setSelectedUser(null);}}>×</button>
             </div>
+
+            {saving && (
+              <div className="saving-indicator">
+                Сохранение...
+              </div>
+            )}
 
             <div className="form-group">
               <label>Логин:</label>

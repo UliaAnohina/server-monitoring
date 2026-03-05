@@ -1,28 +1,50 @@
 import { useState, useEffect } from 'react';
+import { fetchMetrics } from '../../apiService';
+import { config } from '../../config';
 import './MetricsDashboard.css';
 
 function MetricsDashboard({ userRole = 'Гость', showContainer = true }) {
   const [metrics, setMetrics] = useState({
-    cpu: 58,
-    ram: 76,
-    disk: 40,
+    cpu: 0,
+    ram: 0,
+    disk: 0,
     status: 'норма',
     alerts: 'нет',
-    lastUpdate: new Date()
+    lastUpdate: null
   });
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setMetrics(prev => ({
-        ...prev,
-        cpu: Math.floor(Math.random() * 40) + 40,
-        ram: Math.floor(Math.random() * 30) + 60,
-        disk: Math.floor(Math.random() * 30) + 30,
-        lastUpdate: new Date()
-      }));
-    }, 10000);
+    let isMounted = true;
+
+    const loadMetrics = async () => {
+      try {
+        setError('');
+        const data = await fetchMetrics();
+        if (!isMounted) return;
+
+        setMetrics({
+          cpu: data.cpu_percent ?? 0,
+          ram: data.mem_percent ?? 0,
+          disk: data.disk_percent ?? 0,
+          status: data.status || 'норма',
+          alerts: (data.alerts && data.alerts.length > 0) ? data.alerts.join(', ') : 'нет',
+          lastUpdate: data.last_update ? new Date(data.last_update) : new Date()
+        });
+      } catch (e) {
+        if (!isMounted) return;
+        setError(e.message || 'Не удалось загрузить метрики');
+      }
+    };
+
+    loadMetrics();
+
+    const interval = setInterval(loadMetrics, config.AUTO_REFRESH.METRICS || 30000);
     
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const renderIndicators = (value) => {
@@ -45,6 +67,12 @@ function MetricsDashboard({ userRole = 'Гость', showContainer = true }) {
         <span className="server-name">Server 1.0</span>
         <span className="user-role">{userRole}</span>
       </div>
+
+      {error && (
+        <div className="metrics-error">
+          {error}
+        </div>
+      )}
       
       <div className="metrics-grid">
         <div className="metric-item">
@@ -84,7 +112,10 @@ function MetricsDashboard({ userRole = 'Гость', showContainer = true }) {
         <div className="info-row">
           <span className="info-label">Последнее обновление: </span>
           <span className="info-value">
-            {metrics.lastUpdate.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit', second:'2-digit'})} (обновление: 10 сек)
+            {metrics.lastUpdate 
+              ? metrics.lastUpdate.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit', second:'2-digit'})
+              : '—'
+            } (обновление: {Math.round((config.AUTO_REFRESH.METRICS || 30000) / 1000)} сек)
           </span>
         </div>
       </div>

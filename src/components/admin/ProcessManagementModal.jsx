@@ -1,39 +1,56 @@
 import { useState } from 'react';
+import { manageProcess } from '../../apiService';
 import './ProcessManagementModal.css';
 
 function ProcessManagementModal({ process, onClose, onProcessUpdated }) {
   const [action, setAction] = useState(null); // 'terminate', 'terminateTree', 'priority'
   const [newPriority, setNewPriority] = useState(process.priority || 0);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState('');
 
-  // Завершить процесс
   const handleTerminate = (terminateTree = false) => {
     setAction(terminateTree ? 'terminateTree' : 'terminate');
     setShowConfirm(true);
+    setError('');
   };
 
-  // Изменить приоритет
   const handleChangePriority = () => {
     setAction('priority');
     setShowConfirm(true);
+    setError('');
   };
 
-  // Подтверждение действия
-  const handleConfirm = () => {
-    if (action === 'terminate') {
-        alert(`Процесс ${process.name} (PID: ${process.pid}) завершен`);
-        // Сообщаем родителю, что нужно удалить процесс
+  const handleConfirm = async () => {
+    try {
+      setIsProcessing(true);
+      setError('');
+
+      const apiAction = action === 'terminate'
+        ? 'kill'
+        : action === 'terminateTree'
+          ? 'kill_tree'
+          : 'priority';
+
+      await manageProcess(process.pid, apiAction, true, {
+        priority: apiAction === 'priority' ? newPriority : undefined
+      });
+
+      if (action === 'terminate') {
         onProcessUpdated(process.pid, 'terminate');
-    } else if (action === 'terminateTree') {
-        alert(`Дерево процессов ${process.name} (PID: ${process.pid}) завершено`);
+      } else if (action === 'terminateTree') {
         onProcessUpdated(process.pid, 'terminateTree');
-    } else if (action === 'priority') {
-        alert(`Приоритет процесса ${process.name} изменен на ${newPriority}`);
+      } else if (action === 'priority') {
         onProcessUpdated(process.pid, 'priority', newPriority);
+      }
+
+      setShowConfirm(false);
+      onClose();
+    } catch (e) {
+      setError(e.message || 'Ошибка управления процессом');
+    } finally {
+      setIsProcessing(false);
     }
-    
-    setShowConfirm(false);
-    onClose();
   };
 
   return (
@@ -106,10 +123,16 @@ function ProcessManagementModal({ process, onClose, onProcessUpdated }) {
             <p className="confirm-warning">
               ⚠️ Это действие может повлиять на работу системы!
             </p>
+
+            {error && (
+              <p className="confirm-error">
+                {error}
+              </p>
+            )}
             
             <div className="confirm-buttons">
-              <button className="btn btn-danger" onClick={handleConfirm}>
-                Подтвердить
+              <button className="btn btn-danger" onClick={handleConfirm} disabled={isProcessing}>
+                {isProcessing ? 'Выполнение...' : 'Подтвердить'}
               </button>
               <button className="btn btn-secondary" onClick={() => setShowConfirm(false)}>
                 Отмена

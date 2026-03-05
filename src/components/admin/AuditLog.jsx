@@ -1,23 +1,53 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { fetchAuditLog, exportAuditLog } from '../../apiService';
 
 import './AuditLog.css';
 
 function AuditLog() {
-  const [logs] = useState([
-    { id: 1, time: '2026-02-24 10:30:15', user: 'admin', action: 'Завершение процесса', object: 'chrome.exe (PID: 1234)', ip: '192.168.1.100' },
-    { id: 2, time: '2026-02-24 09:15:22', user: 'admin', action: 'Добавление пользователя', object: 'user2', ip: '192.168.1.100' },
-    { id: 3, time: '2026-02-23 16:45:10', user: 'user1', action: 'Просмотр метрик', object: '-', ip: '192.168.1.105' },
-    { id: 4, time: '2026-02-23 14:30:05', user: 'admin', action: 'Изменение приоритета', object: 'python.exe (PID: 5678)', ip: '192.168.1.100' },
-    { id: 5, time: '2026-02-23 11:20:30', user: 'admin', action: 'Удаление пользователя', object: 'guest1', ip: '192.168.1.100' },
-    { id: 1, time: '2026-02-24 10:30:15', user: 'admin', action: 'Завершение процесса', object: 'chrome.exe (PID: 1234)', ip: '192.168.1.100' },
-    { id: 2, time: '2026-02-24 09:15:22', user: 'admin', action: 'Добавление пользователя', object: 'user2', ip: '192.168.1.100' },
-    { id: 3, time: '2026-02-23 16:45:10', user: 'user1', action: 'Просмотр метрик', object: '-', ip: '192.168.1.105' },
-    { id: 4, time: '2026-02-23 14:30:05', user: 'admin', action: 'Изменение приоритета', object: 'python.exe (PID: 5678)', ip: '192.168.1.100' },
-    { id: 5, time: '2026-02-23 11:20:30', user: 'admin', action: 'Удаление пользователя', object: 'guest1', ip: '192.168.1.100' },
-  ]);
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const loadLogs = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        const data = await fetchAuditLog();
+        setLogs(data);
+      } catch (e) {
+        setError(e.message || 'Не удалось загрузить журнал аудита');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadLogs();
+  }, []);
+
+  const handleExport = async () => {
+    try {
+      setError('');
+      await exportAuditLog('csv');
+    } catch (e) {
+      setError(e.message || 'Не удалось экспортировать журнал');
+    }
+  };
 
   return (
     <div className="audit-log">
+      <div className="audit-header">
+        <button className="btn btn-primary" onClick={handleExport}>
+          Экспорт в CSV
+        </button>
+      </div>
+
+      {error && (
+        <div className="audit-error">
+          {error}
+        </div>
+      )}
+
       <div className="table-scroll-wrapper">
         <table className="audit-table">
           <thead>
@@ -30,15 +60,29 @@ function AuditLog() {
             </tr>
           </thead>
           <tbody>
-            {logs.map(log => (
-              <tr key={log.id}>
-                <td>{log.time}</td>
-                <td>{log.user}</td>
-                <td>{log.action}</td>
-                <td>{log.object}</td>
-                <td>{log.ip}</td>
+            {loading ? (
+              <tr>
+                <td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>
+                  Загрузка записей аудита...
+                </td>
               </tr>
-            ))}
+            ) : logs.length === 0 ? (
+              <tr>
+                <td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>
+                  Записей аудита нет
+                </td>
+              </tr>
+            ) : (
+              logs.map(log => (
+                <tr key={log.id}>
+                  <td>{log.timestamp || log.time}</td>
+                  <td>{log.username || log.user}</td>
+                  <td>{log.action}</td>
+                  <td>{log.object_name || log.object || '-'}</td>
+                  <td>{log.ip_address || log.ip}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

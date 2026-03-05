@@ -1,32 +1,40 @@
 import { useState, useEffect } from 'react';
+import { fetchProcesses } from '../../apiService';
+import { config } from '../../config';
 import ProcessManagementModal from './ProcessManagementModal';
 import './ProcessTableAdmin.css';
 
 function ProcessTableAdmin() {
-  const [processes, setProcesses] = useState([
-    { pid: 1001, name: 'chrome.exe', cpu: 15.2, mem: 8.5, status: 'Running', owner: 'user1', priority: 0 },
-    { pid: 1002, name: 'python.exe', cpu: 2.1, mem: 3.2, status: 'Sleeping', owner: 'admin', priority: 5 },
-    { pid: 1003, name: 'code.exe', cpu: 8.7, mem: 12.1, status: 'Running', owner: 'user2', priority: -5 },
-    { pid: 1004, name: 'node.exe', cpu: 5.3, mem: 4.8, status: 'Running', owner: 'user1', priority: 0 },
-    { pid: 1005, name: 'java.exe', cpu: 22.1, mem: 45.2, status: 'Running', owner: 'admin', priority: 10 },
-    { pid: 1006, name: 'docker.exe', cpu: 3.2, mem: 2.1, status: 'Sleeping', owner: 'user3', priority: -10 },
-    { pid: 1007, name: 'nginx.exe', cpu: 1.1, mem: 1.5, status: 'Running', owner: 'admin', priority: 0 },
-  ]);
+  const [processes, setProcesses] = useState([]);
   const [selectedProcess, setSelectedProcess] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-  const [filter, setFilter] = useState(''); // ← ДОБАВЛЕНО: состояние фильтра
+  const [filter, setFilter] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const loadProcesses = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const data = await fetchProcesses({
+        filter_name: filter || undefined,
+        sort_by: sortConfig.key || undefined
+      });
+      setProcesses(data);
+    } catch (e) {
+      setError(e.message || 'Не удалось загрузить процессы');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProcesses(prev => prev.map(p => ({
-        ...p,
-        cpu: Number.parseFloat((Math.max(0, p.cpu + (Math.random() - 0.5) * 2)).toFixed(1)),
-        mem: Number.parseFloat((Math.max(0, p.mem + (Math.random() - 0.5) * 1)).toFixed(1))
-      })));
-    }, 10000);
+    loadProcesses();
+    const interval = setInterval(loadProcesses, config.AUTO_REFRESH.PROCESSES || 10000);
     return () => clearInterval(interval);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, sortConfig.key, sortConfig.direction]);
 
   const handleProcessClick = (process) => {
     setSelectedProcess(process);
@@ -81,6 +89,11 @@ function ProcessTableAdmin() {
       </div>
       
       <div className="table-scroll-wrapper">
+        {error && (
+          <div className="table-error">
+            {error}
+          </div>
+        )}
         <table className="process-table">
           <thead>
             <tr>
