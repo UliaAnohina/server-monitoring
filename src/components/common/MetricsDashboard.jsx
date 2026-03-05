@@ -1,93 +1,143 @@
 import { useState, useEffect } from 'react';
+import { fetchMetrics } from '../../apiService';
+import { config } from '../../config';
 import './MetricsDashboard.css';
 
-function MetricsDashboard({ userRole = 'Гость', showContainer = true }) {
-  const [metrics, setMetrics] = useState({
-    cpu: 58,
-    ram: 76,
-    disk: 40,
-    status: 'норма',
-    alerts: 'нет',
-    lastUpdate: new Date()
-  });
+function MetricsDashboard() {
+  const [metrics, setMetrics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setMetrics(prev => ({
-        ...prev,
-        cpu: Math.floor(Math.random() * 40) + 40,
-        ram: Math.floor(Math.random() * 30) + 60,
-        disk: Math.floor(Math.random() * 30) + 30,
-        lastUpdate: new Date()
-      }));
-    }, 10000);
+    loadMetrics();
     
-    return () => clearInterval(interval);
+    if (config.AUTO_REFRESH.ENABLED) {
+      const interval = setInterval(loadMetrics, config.AUTO_REFRESH.METRICS);
+      return () => clearInterval(interval);
+    }
   }, []);
 
-  const renderIndicators = (value) => {
-    const filledDots = Math.round((value / 100) * 5);
+  const loadMetrics = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await fetchMetrics();
+      setMetrics(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading && !metrics) {
+    return <div className="metrics-loading">Загрузка метрик... {config.USE_MOCKS && '(MOCK)'}</div>;
+  }
+
+  if (error) {
     return (
-      <div className="metric-indicators">
-        {[...Array(5)].map((_, i) => (
-          <div 
-            key={i} 
-            className={`indicator-dot ${i < filledDots ? 'active' : ''}`}
-          />
-        ))}
+      <div className="metrics-error">
+        <p>Ошибка загрузки метрик: {error}</p>
+        <button onClick={loadMetrics}>Повторить</button>
       </div>
     );
+  }
+
+  const getStatusColor = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'ok': return '#4CAF50';
+      case 'warning': return '#FF9800';
+      case 'critical': return '#f44336';
+      default: return '#2196F3';
+    }
   };
 
   return (
-    <div className={showContainer ? 'metrics-container' : 'metrics-inner'}>
+    <div className="metrics-dashboard">
       <div className="metrics-header">
-        <span className="server-name">Server 1.0</span>
-        <span className="user-role">{userRole}</span>
-      </div>
-      
-      <div className="metrics-grid">
-        <div className="metric-item">
-          <div className="metric-header">
-            <span className="metric-label">CPU</span>
-            <span className="metric-value">{metrics.cpu}%</span>
-          </div>
-          {renderIndicators(metrics.cpu)}
-        </div>
-        
-        <div className="metric-item">
-          <div className="metric-header">
-            <span className="metric-label">RAM</span>
-            <span className="metric-value">{metrics.ram}%</span>
-          </div>
-          {renderIndicators(metrics.ram)}
-        </div>
-        
-        <div className="metric-item">
-          <div className="metric-header">
-            <span className="metric-label">DISK</span>
-            <span className="metric-value">{metrics.disk}%</span>
-          </div>
-          {renderIndicators(metrics.disk)}
-        </div>
-      </div>
-      
-      <div className="system-info">
-        <div className="info-row">
-          <span className="info-label">Статус системы: </span>
-          <span className="status-normal">{metrics.status}</span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">Активные алерты: </span>
-          <span className="info-value">{metrics.alerts}</span>
-        </div>
-        <div className="info-row">
-          <span className="info-label">Последнее обновление: </span>
-          <span className="info-value">
-            {metrics.lastUpdate.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit', second:'2-digit'})} (обновление: 10 сек)
+        <h2>Метрики сервера {config.USE_MOCKS && '(MOCK MODE)'}</h2>
+        {metrics?.hostname && <span className="hostname">{metrics.hostname}</span>}
+        {metrics?.status && (
+          <span 
+            className="status-badge"
+            style={{ backgroundColor: getStatusColor(metrics.status) }}
+          >
+            {metrics.status}
           </span>
-        </div>
+        )}
       </div>
+
+      <div className="metrics-grid">
+        <div className="metric-card">
+          <div className="metric-icon">🖥️</div>
+          <div className="metric-info">
+            <div className="metric-value">{metrics?.cpu_percent}%</div>
+            <div className="metric-label">CPU Usage</div>
+          </div>
+          <div className="metric-bar">
+            <div 
+              className="metric-bar-fill"
+              style={{ 
+                width: `${metrics?.cpu_percent}%`,
+                backgroundColor: metrics?.cpu_percent > 90 ? '#f44336' : metrics?.cpu_percent > 70 ? '#FF9800' : '#4CAF50'
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="metric-card">
+          <div className="metric-icon">💾</div>
+          <div className="metric-info">
+            <div className="metric-value">{metrics?.mem_percent}%</div>
+            <div className="metric-label">Memory Usage</div>
+          </div>
+          <div className="metric-bar">
+            <div 
+              className="metric-bar-fill"
+              style={{ 
+                width: `${metrics?.mem_percent}%`,
+                backgroundColor: metrics?.mem_percent > 90 ? '#f44336' : metrics?.mem_percent > 70 ? '#FF9800' : '#4CAF50'
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="metric-card">
+          <div className="metric-icon">💿</div>
+          <div className="metric-info">
+            <div className="metric-value">{metrics?.disk_percent}%</div>
+            <div className="metric-label">Disk Usage</div>
+          </div>
+          <div className="metric-bar">
+            <div 
+              className="metric-bar-fill"
+              style={{ 
+                width: `${metrics?.disk_percent}%`,
+                backgroundColor: metrics?.disk_percent > 90 ? '#f44336' : metrics?.disk_percent > 70 ? '#FF9800' : '#4CAF50'
+              }}
+            />
+          </div>
+        </div>
+
+        {metrics?.alerts && metrics.alerts.length > 0 && (
+          <div className="alerts-section">
+            <h3>⚠️ Предупреждения</h3>
+            <ul>
+              {metrics.alerts.map((alert, index) => (
+                <li key={index} className="alert-item">
+                  {alert}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {metrics?.last_update && (
+        <div className="last-update">
+          Последнее обновление: {new Date(metrics.last_update).toLocaleString()}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { config } from './config';
 import Header from './components/common/Header';
 import GuestView from './components/guest/GuestView';
 import UserView from './components/user/UserView';
@@ -16,9 +17,20 @@ function App() {
     setUserRole(null);
   };
 
+  const toggleMockMode = () => {
+    config.USE_MOCKS = !config.USE_MOCKS;
+    alert(`Переключено на: ${config.USE_MOCKS ? 'MOCK данные' : 'Реальный API'}`);
+    window.location.reload();
+  };
+
   if (!userRole) {
     return (
       <div className="login-page">
+        <div className="mode-switcher">
+          <button onClick={toggleMockMode} className="mode-btn">
+            {config.USE_MOCKS ? 'Тестовый режим' : 'Real API'}
+          </button>
+        </div>
         <h1 style={{ color: '#FF8C00', textAlign: 'center' }}>Авторизация</h1>
         <div style={{
           display: 'flex',
@@ -32,7 +44,8 @@ function App() {
           margin: '100px auto'
         }}>
           <p style={{ textAlign: 'center', color: '#666' }}>
-            Выберите роль для тестирования:
+          </p>
+          <p style={{ textAlign: 'center', fontSize: '12px', color: '#999' }}>
           </p>
           <button onClick={() => handleLogin('guest')} style={buttonStyle}>
             Войти как Гость
@@ -52,7 +65,6 @@ function App() {
     <div className="app">
       <Header role={userRole} onLogout={handleLogout} />
       <div className="monitoring-page">
-        {/* Рендерим ТОЛЬКО один компонент в зависимости от роли */}
         {userRole === 'guest' && <GuestView />}
         {userRole === 'user' && <UserView />}
         {userRole === 'admin' && <AdminView />}
