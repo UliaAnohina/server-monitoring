@@ -1,6 +1,40 @@
 import { config } from './config';
 import { mockApi } from './mocks/mockApi';
 
+const normalizeUserRole = (role) => {
+  if (role === 'limited') {
+    return 'user';
+  }
+
+  return role || 'user';
+};
+
+const toApiRole = (role) => {
+  if (role === 'user' || role === 'guest') {
+    return 'limited';
+  }
+
+  return role || 'limited';
+};
+
+const parseApiErrorMessage = async (response, fallbackMessage) => {
+  const errorPayload = await response.json().catch(() => null);
+  return errorPayload?.detail || errorPayload?.message || fallbackMessage;
+};
+
+const normalizeCurrentUser = (user) => {
+  if (!user) {
+    return null;
+  }
+
+  const normalizedRole = normalizeUserRole(user.role);
+
+  return {
+    ...user,
+    role: normalizedRole,
+    is_admin: user.is_admin ?? normalizedRole === 'admin'
+  };
+};
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('access_token');
@@ -36,7 +70,8 @@ export const getAccessToken = async (username, password) => {
     if (response.status === 401) {
       throw new Error('Неверный логин или пароль');
     }
-    throw new Error('Ошибка сервера авторизации');
+
+    throw new Error(await parseApiErrorMessage(response, 'Ошибка сервера авторизации'));
   }
   
   const data = await response.json();
@@ -45,6 +80,27 @@ export const getAccessToken = async (username, password) => {
     localStorage.setItem('token_type', data.token_type || 'bearer');
   }
   return data;
+};
+
+export const fetchCurrentUserProfile = async () => {
+  if (config.USE_MOCKS) {
+    return normalizeCurrentUser(getCurrentUser());
+  }
+
+  const response = await fetch(`${config.API_BASE_URL}/users/me`, {
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Не удалось получить профиль пользователя');
+    }
+
+    throw new Error(await parseApiErrorMessage(response, 'Ошибка загрузки профиля'));
+  }
+
+  const data = await response.json();
+  return normalizeCurrentUser(data);
 };
 
 // ПОЛЬЗОВАТЕЛИ
@@ -70,7 +126,12 @@ export const fetchUsers = async () => {
 
 export const getCurrentUser = () => {
   const userStr = localStorage.getItem('user');
-  return userStr ? JSON.parse(userStr) : null;
+
+  if (!userStr) {
+    return null;
+  }
+
+  return normalizeCurrentUser(JSON.parse(userStr));
 };
 
 export const logoutUser = () => {
@@ -178,14 +239,13 @@ export const addUser = async (userData) => {
     body: JSON.stringify({
       username: userData.login,
       password: userData.password,
-      is_admin: userData.role === 'admin'
+      role: toApiRole(userData.role)
     })
   });
   
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
     if (response.status === 400) {
-      throw new Error(error.message || 'Username уже занят');
+      throw new Error(await parseApiErrorMessage(response, 'Некорректные данные пользователя'));
     }
     if (response.status === 401 || response.status === 403) {
       throw new Error('Нет прав для создания пользователей');
@@ -211,7 +271,7 @@ export const editUser = async (userId, userData) => {
   if (userData.login) body.username = userData.login;
   if (userData.password) body.password = userData.password;
   if (userData.role !== undefined) {
-    body.is_admin = userData.role === 'admin';
+    body.role = toApiRole(userData.role);
   }
   
   const response = await fetch(`${config.API_BASE_URL}/users/${userId}`, {
@@ -221,9 +281,10 @@ export const editUser = async (userId, userData) => {
   });
   
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
     if (response.status === 404) throw new Error('Пользователь не найден');
-    if (response.status === 400) throw new Error(error.message || 'Некорректные данные');
+    if (response.status === 400) {
+      throw new Error(await parseApiErrorMessage(response, 'Некорректные данные'));
+    }
     if (response.status === 401 || response.status === 403) throw new Error('Нет прав');
     throw new Error('Ошибка обновления');
   }
@@ -249,9 +310,10 @@ export const deleteUser = async (userId) => {
   });
   
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
     if (response.status === 404) throw new Error('Пользователь не найден');
-    if (response.status === 400) throw new Error(error.message || 'Нельзя удалить пользователя');
+    if (response.status === 400) {
+      throw new Error(await parseApiErrorMessage(response, 'Нельзя удалить пользователя'));
+    }
     if (response.status === 401 || response.status === 403) throw new Error('Нет прав');
     throw new Error('Ошибка удаления');
   }

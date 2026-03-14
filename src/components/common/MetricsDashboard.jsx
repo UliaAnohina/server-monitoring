@@ -5,11 +5,11 @@ import './MetricsDashboard.css';
 
 function MetricsDashboard({ userRole = 'Гость', showContainer = true }) {
   const [metrics, setMetrics] = useState({
-    cpu: 0,
-    ram: 0,
-    disk: 0,
-    status: 'норма',
-    alerts: 'нет',
+    cpu: null,
+    ram: null,
+    disk: null,
+    status: 'Загрузка...',
+    alerts: 'Загрузка...',
     lastUpdate: null
   });
   const [error, setError] = useState('');
@@ -47,8 +47,17 @@ function MetricsDashboard({ userRole = 'Гость', showContainer = true }) {
     };
   }, []);
 
+  const formatMetricValue = (value) => {
+    if (value === null || value === undefined) {
+      return '—';
+    }
+
+    return `${value}%`;
+  };
+
   const renderIndicators = (value) => {
-    const filledDots = Math.round((value / 100) * 5);
+    const safeValue = value ?? 0;
+    const filledDots = Math.round((safeValue / 100) * 5);
     return (
       <div className="metric-indicators">
         {[...Array(5)].map((_, i) => (
@@ -78,7 +87,7 @@ function MetricsDashboard({ userRole = 'Гость', showContainer = true }) {
         <div className="metric-item">
           <div className="metric-header">
             <span className="metric-label">CPU</span>
-            <span className="metric-value">{metrics.cpu}%</span>
+            <span className="metric-value">{formatMetricValue(metrics.cpu)}</span>
           </div>
           {renderIndicators(metrics.cpu)}
         </div>
@@ -86,7 +95,7 @@ function MetricsDashboard({ userRole = 'Гость', showContainer = true }) {
         <div className="metric-item">
           <div className="metric-header">
             <span className="metric-label">RAM</span>
-            <span className="metric-value">{metrics.ram}%</span>
+            <span className="metric-value">{formatMetricValue(metrics.ram)}</span>
           </div>
           {renderIndicators(metrics.ram)}
         </div>
@@ -94,7 +103,7 @@ function MetricsDashboard({ userRole = 'Гость', showContainer = true }) {
         <div className="metric-item">
           <div className="metric-header">
             <span className="metric-label">DISK</span>
-            <span className="metric-value">{metrics.disk}%</span>
+            <span className="metric-value">{formatMetricValue(metrics.disk)}</span>
           </div>
           {renderIndicators(metrics.disk)}
         </div>

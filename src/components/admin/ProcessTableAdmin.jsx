@@ -10,12 +10,10 @@ function ProcessTableAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [filter, setFilter] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const loadProcesses = async () => {
     try {
-      setLoading(true);
       setError('');
       const data = await fetchProcesses({
         filter_name: filter || undefined,
@@ -24,8 +22,6 @@ function ProcessTableAdmin() {
       setProcesses(data);
     } catch (e) {
       setError(e.message || 'Не удалось загрузить процессы');
-    } finally {
-      setLoading(false);
     }
   };
 

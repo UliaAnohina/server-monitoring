@@ -2,6 +2,26 @@ import { useState, useEffect, useRef } from 'react';
 import { fetchUsers, addUser, editUser, deleteUser } from '../../apiService';
 import './UserManagement.css';
 
+function formatLastLogin(value) {
+  if (!value) {
+    return 'Никогда';
+  }
+
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return value;
+  }
+
+  return parsedDate.toLocaleString('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+}
+
 function mapApiUserToView(user) {
   const rawRole = user.role || user.role_name;
   let roleLabel = rawRole;
@@ -18,7 +38,7 @@ function mapApiUserToView(user) {
     id: user.id,
     login: user.login || user.username,
     role: roleLabel,
-    lastLogin: user.lastLogin || user.last_login || 'Никогда'
+    lastLogin: formatLastLogin(user.lastLogin || user.last_login)
   };
 }
 
@@ -140,7 +160,7 @@ function UserManagement() {
       login: user.login,
       password: '',
       confirmPassword: '',
-      role: user.role === 'Администратор' ? 'admin' : user.role === 'Ограниченный' ? 'user' : 'guest'
+      role: user.role === 'Администратор' ? 'admin' : 'user'
     });
     setErrors({});
     setIsModalOpen(true);
@@ -355,7 +375,6 @@ function UserManagement() {
                 value={formData.role}
                 onChange={(e) => setFormData({...formData, role: e.target.value})}
               >
-                <option value="guest">Гость</option>
                 <option value="user">Ограниченный пользователь</option>
                 <option value="admin">Администратор</option>
               </select>

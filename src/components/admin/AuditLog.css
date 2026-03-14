@@ -40,6 +40,10 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
+.audit-table td {
+  color: #333;
+}
+
 .audit-table th {
   background-color: #fafafa;
   font-weight: 600;

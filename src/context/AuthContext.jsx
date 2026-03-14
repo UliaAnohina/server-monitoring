@@ -1,5 +1,10 @@
 import { createContext, useState, useContext } from 'react';
-import { getAccessToken, logoutUser, getCurrentUser } from '../apiService';
+import {
+  fetchCurrentUserProfile,
+  getAccessToken,
+  logoutUser,
+  getCurrentUser
+} from '../apiService';
 import { config } from '../config';
 
 const AuthContext = createContext();
@@ -29,13 +34,9 @@ export const AuthProvider = ({ children }) => {
           role: roleForMock || (username === 'admin' ? 'admin' : 'user')
         };
       } else {
-        // REAL API режим: используем данные из ответа токена
-        userData = {
-          id: tokenData.user_id || 1,
-          username: username,
-          is_admin: tokenData.is_admin || false,
-          role: tokenData.role || 'user'
-        };
+        // REAL API режим: токен не содержит профиль пользователя,
+        // поэтому забираем актуальные данные отдельным запросом.
+        userData = await fetchCurrentUserProfile();
       }
       
       // Сохраняем в localStorage для persistence между перезагрузками

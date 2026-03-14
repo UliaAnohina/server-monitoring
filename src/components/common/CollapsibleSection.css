@@ -77,6 +77,10 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
+.section-content td {
+  color: #333;
+}
+
 .section-content th {
   background-color: #fafafa;
   font-weight: 600;
